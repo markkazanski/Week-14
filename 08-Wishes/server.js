@@ -31,6 +31,8 @@ connection.connect(function(err) {
   console.log("connected as id " + connection.threadId);
 });
 
+app.listen(port);
+
 // Root get route
 app.get("/", function(req, res) {
   connection.query("SELECT * FROM wishes;", function(err, data) {
@@ -44,4 +46,16 @@ app.get("/", function(req, res) {
 
     res.render("index", { wishes: data });
   });
+});
+
+app.post("/", function(req, res) {
+  console.log('You sent, ' + req.body.task);
+
+  connection.query(`INSERT INTO wishes (wish) VALUES ("${req.body.task}")`, function(err, data) {
+    if(err) throw err;
+
+    console.log("Query: " + data);
+    res.redirect("/");
+  });
+
 });
