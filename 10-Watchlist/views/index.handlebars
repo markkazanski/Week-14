@@ -1,18 +1,96 @@
 <h1>Movie Watchlist</h1>
 
-<h3>Save the tasks you need to get to later</h3>
+<h3>Save the movies you want to watch.</h3>
 
 <ul>
   {{#each movies}}
-  	<li>
+  	<li class="movie-{{this.id}}">
   	   <p>ID: {{this.id}}</p>
-       <p>Task: {{this.movie}}</p>
+       <p>Movie: {{this.movie}} - <button class="delete-movie" data-movie-id="{{this.id}}">X</button></p>
   	</li>
   {{/each}}
 </ul>
 
-<form action="/" method="POST">
-	<textarea type="text" name="movie"></textarea>
-
-	<button type="submit">Submit</button>
+<h2>Create Movie</h2>
+<form id="createmovie" class="button-size">
+  <textarea type="text" name="movie"></textarea>
+  <button type="submit">Save Movie!</button>
 </form>
+
+<h2>Update a Movie</h2>
+<form id="updatemovie" class="button-size">
+  <select name="id">
+		{{#each movies}}
+			<option value="{{this.id}}">{{this.movie}}</option>
+		{{/each}}
+	</select>
+  <textarea type="text" name="movie" placeholder="movie"></textarea>
+  <button type="submit">Update Movie!</button>
+</form>
+
+<script>
+ $("#createmovie").on("submit", function(event) {
+    // Make sure to preventDefault on a submit event.
+    event.preventDefault();
+
+    var newMovie = {
+      movie: $("#createmovie [name=movie]").val().trim()
+    };
+
+    // Send the POST request.
+    $.ajax("/movies", {
+      type: "POST",
+      data: newMovie
+    }).then(
+      function() {
+        console.log("created new movie");
+        // Reload the page to get the updated list
+        location.reload();
+      }
+    );
+  });
+
+	 $("button.delete-movie").on("click", function(event) {
+    // Make sure to preventDefault on a submit event.
+    event.preventDefault();
+
+		console.log( $(this).attr("data-movie-id") );
+
+			// Send the DELETE request.
+			$.ajax("/movies/" + $(this).attr("data-movie-id"), {
+				type: "DELETE"
+			}).then(
+				function() {
+					console.log("created new movie");
+					// Reload the page to get the updated movie list
+					location.reload();
+				}
+			);
+	 });
+
+	$("#updatemovie").on("submit", function(event) {
+    // Make sure to preventDefault on a submit event.
+    event.preventDefault();
+		console.log($("#updatemovie select").val() + ' - ' + $("#updatemovie textarea").val());
+
+		var updateMovie = {
+			id: $("#updatemovie select").val(),
+			movie: $("#updatemovie textarea").val()
+		};
+
+			// Send the PUT request.
+			$.ajax("/movies/" + updateMovie.id, {
+				type: "PUT",
+				data: updateMovie
+			}).then(
+				function() {
+					console.log("Updated movie");
+					// Reload the page to get the updated movie list
+					location.reload();
+				}
+			);
+
+
+	});
+
+	</script>

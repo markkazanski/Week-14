@@ -48,10 +48,22 @@ app.get("/", function(req, res) {
   });
 });
 
-app.post("/", function(req, res) {
-  console.log('You sent, ' + req.body.task);
+// movies get route
+app.get("/movies", function(req, res) {
+  connection.query("SELECT * FROM movies;", function(err, data) {
+    if (err) throw err;
 
-  connection.query(`INSERT INTO movies (movie) VALUES ("${req.body.task}")`, function(err, data) {
+    // Test it
+    console.log('The solution is: ', data);
+
+    res.json({ movies: data });
+  });
+});
+
+app.post("/movies", function(req, res) {
+  console.log('You sent, ' + req.body.movie);
+
+  connection.query(`INSERT INTO movies (movie) VALUES ("${req.body.movie}")`, function(err, data) {
     if(err) throw err;
 
     console.log("Query: " + data);
@@ -59,3 +71,35 @@ app.post("/", function(req, res) {
   });
 
 });
+
+// Delete a movie
+app.delete("/movies/:id", function(req, res) {
+  connection.query("DELETE FROM movies WHERE id = ?", [req.params.id], function(err, result) {
+    if (err) {
+      // If an error occurred, send a generic server faliure
+      return res.status(500).end();
+    } else if (result.affectedRows == 0) {
+      // If no rows were changed, then the ID must not exist, so 404
+      return res.status(404).end();
+    } else {
+      res.status(200).end();
+    }
+  });
+});
+
+// Update a movie
+app.put("/movies/:id", function(req, res) {
+  connection.query("UPDATE movies SET movie = ? WHERE id = ?", [req.body.movie, req.params.id], function(err, result) {
+    if (err) {
+      // If an error occurred, send a generic server faliure
+      return res.status(500).end();
+    } else if (result.changedRows == 0) {
+      // If no rows were changed, then the ID must not exist, so 404
+      return res.status(404).end();
+    } else {
+      res.status(200).end();
+    }
+  });
+});
+
+
